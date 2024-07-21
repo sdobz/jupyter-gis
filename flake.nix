@@ -22,6 +22,7 @@
         matplotlib
 
         papermill
+        black
       ]);
     };
 
@@ -30,6 +31,7 @@
     devShell = pkgs.mkShell {
       buildInputs = [
         packages.pythonEnv
+        pkgs.openscad
       ];
       shellHook = ''
         # export JUPYTERLAB_DIR="$(pwd)/jupyterlab"
