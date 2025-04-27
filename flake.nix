@@ -2,15 +2,18 @@
   description = "Volcandle dev env";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    cq-flake.url = "github:vinszent/cq-flake";
     utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, utils }: (utils.lib.eachSystem ["x86_64-linux" ] (system: let
-    pkgs = nixpkgs.legacyPackages.${system};
+  outputs = { self, cq-flake, utils }: (utils.lib.eachSystem ["x86_64-linux" ] (system: let
+    pkgs = cq-flake.inputs.nixpkgs.legacyPackages.${system};
+    python = cq-flake.packages.${system}.python;
   in rec {
     packages = {
-      pythonEnv = pkgs.python3.withPackages(ps: with ps; [
+      pythonEnv = python.withPackages(ps: with ps; [
+        cq-flake.packages.${system}.cadquery
+        
         numpy
         pandas
         pillow
