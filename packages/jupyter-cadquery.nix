@@ -4,14 +4,15 @@
 , setuptools
 , jupyter-packaging
 , ipywidgets
-, cadquery
 , cachetools
 , hatchling
 , hatch-jupyter-builder
-, hatch-nodejs-version
-, pillow
 
 , cad-viewer-widget
+, ocp-vscode
+, orjson
+
+, cadquery
 , jupyterlab
 }:
 buildPythonPackage rec {
@@ -36,7 +37,8 @@ buildPythonPackage rec {
   propagatedBuildInputs = [
     jupyterlab
     cadquery
-    #pythreejs
+    ocp-vscode
+    orjson
     cachetools
 
     cad-viewer-widget
