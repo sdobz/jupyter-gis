@@ -1,7 +1,8 @@
 { lib
 , buildPythonPackage
-, fetchFromGitHub
+, fetchPypi
 , setuptools
+, setuptools_scm
 
 , anywidget
 , bqplot
@@ -27,17 +28,20 @@ buildPythonPackage rec {
     pname = "geemap";
     version = "0.35.3";
 
-    src = fetchFromGitHub {
-        owner = "gee-community";
-        repo = "geemap";
-        rev = "v${version}";
-        hash = "sha256-260/oiRqTubChLtQmGOjeXmKBB0xh4LjzJD+GLRvn9w=";
-    };
+    src = fetchPypi {
+      inherit pname version;
+      sha256 = "sha256-+1FiKQu1GBFvwrJLtna2h4UnB69LsDpTEeWYh/4Rh+Q=";
+    }; 
 
     pyproject = true;
+
+    postPatch = ''
+        substituteInPlace pyproject.toml --replace 'ipyleaflet>=0.19.2' 'ipyleaflet>=0.0.0'
+        '';
     
     build-system = [
         setuptools
+        setuptools_scm
     ];
 
     dependencies = [

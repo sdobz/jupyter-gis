@@ -52,6 +52,15 @@
       ipyleaflet = python.pkgs.callPackage ./packages/ipyleaflet.nix {
         inherit jupyter-leaflet;
       };
+      ipytree = python.pkgs.callPackage ./packages/ipytree.nix {};
+      geemap = python.pkgs.callPackage ./packages/geemap.nix {
+        inherit earthengine-api eerepr ipyevents ipyfilechooser ipyleaflet ipytree;
+      };
+
+      deepcomparer = python.pkgs.callPackage ./packages/deepcomparer.nix {};
+      k3d-jupyter = python.pkgs.callPackage ./packages/k3d-jupyter.nix {
+        inherit jupyterlab deepcomparer;
+      };
 
       pythonEnv = python.withPackages(ps: [
         cq-flake.packages.${system}.cadquery
