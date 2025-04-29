@@ -1,5 +1,6 @@
+# ref: https://github.com/fgaz/nixpkgs/blob/0fb8c1fb471cad678aeffb14fd835719593673d3/pkgs/development/python-modules/ipydatagrid/default.nix
+# ref: https://github.com/NixOS/nixpkgs/blob/7fccd1c7f11b23cd0f8c0ed5ae90dc37197dbadf/pkgs/development/python-modules/dash/default.nix
 { lib
-, yarn
 , buildPythonPackage
 , fetchFromGitHub
 , setuptools
@@ -8,6 +9,15 @@
 , hatch-nodejs-version
 
 , jupyterlab
+, ipywidgets
+, numpy
+, pyparsing
+
+, yarn
+, yarnConfigHook
+, breakpointHook
+, fetchYarnDeps
+, nodejs
 }:
 buildPythonPackage rec {
     pname = "cad-viewer-widget";
@@ -20,6 +30,11 @@ buildPythonPackage rec {
         hash = "sha256-dTBfn+qQSvHz4NgYHddjNGtIXGXL6Kt2Ad5cAJBc+nE=";
     };
 
+    yarnOfflineCache = fetchYarnDeps {
+        yarnLock = "${src}/js/yarn.lock";
+        hash = "sha256-dPMP0fXYyygh0sHeKg4HZN/e8GMXB9PzFoe+YlKlwjc=";
+    };
+
     pyproject = true;
     
     build-system = [
@@ -27,16 +42,31 @@ buildPythonPackage rec {
         hatchling
         hatch-jupyter-builder
         hatch-nodejs-version
-
-        yarn
     ];
 
-    propagatedBuildInputs = [
+    preConfigure = ''
+        pushd js
+    '';
+
+    preBuild = ''
+        # Generate the jupyterlab extension files
+        yarn --offline run build:prod
+
+        popd
+    '';
+
+    nativeBuildInputs = [
+        # breakpointHook
+        yarnConfigHook
+        yarn
+        nodejs
         jupyterlab
     ];
 
-    pythonImportsCheck = [
-        "cad-viewer-widget"
+    dependencies = [
+        ipywidgets
+        numpy
+        pyparsing
     ];
 
     meta = with lib; {

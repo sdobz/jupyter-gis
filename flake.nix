@@ -40,7 +40,7 @@
 
       pythonEnv = python.withPackages(ps: [
         cq-flake.packages.${system}.cadquery
-        jupyter-cadquery
+        # jupyter-cadquery
         jupyterlab
       ] ++ (with ps; [
         numpy
@@ -71,6 +71,7 @@
       buildInputs = [
         packages.pythonEnv
         # pkgs.openscad
+        pkgs.cntr
       ];
       shellHook = ''
 
