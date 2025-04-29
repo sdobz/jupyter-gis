@@ -1,60 +1,26 @@
+# https://github.com/LKS-CHART/medical-imaging-nix/blob/e809cfc1711e871ec5d7fd32a46dac8ded6514a2/flake/overlay.nix#L22
 { lib
 , buildPythonPackage
-, fetchFromGitHub
-, setuptools
-, hatchling
-, hatch-jupyter-builder
+, fetchPypi
 
 , ipywidgets
-, jupyterlab
-
-, yarn
-, yarnConfigHook
-, breakpointHook
-, fetchYarnDeps
-, nodejs
+, jupyter-packaging
 }:
 buildPythonPackage rec {
     pname = "ipyevents";
-    version = "2.0.2";
-
-    src = fetchFromGitHub {
-        owner = "sdobz";
-        repo = "ipyevents";
-        rev = "722163d37b18f3d36c390846d3d2370496432d78";
-        hash = "sha256-/kEdmy1YO1zA8MOSLMTL2NyJiDH405t8PA7SkCuK5Wk=";
+    version = "2.0.1";
+    src = fetchPypi {
+      inherit pname version;
+      sha256 = "I+sq+rE9kFY5fxIKiAUd076wZ7aY0Iszrf/J4HfwGcs=";
     };
-
-    yarnOfflineCache = fetchYarnDeps {
-        yarnLock = "${src}/yarn.lock";
-        hash = "sha256-Qo32y3VyCCvNZTvFYk/C7SbC0MFFmyu9wQdsAnew2oc=";
-    };
-
+    propagatedBuildInputs = [ 
+      ipywidgets jupyter-packaging
+    ];
+    pythonImportsCheck = "ipyevents";
+    doCheck = false;
     postPatch = ''
-    substituteInPlace pyproject.toml \
-      --replace 'jupyterlab==3.*' 'jupyterlab==4.*'
-    '';
-
-    pyproject = true;
-    
-    build-system = [
-        setuptools
-        hatchling
-        hatch-jupyter-builder
-    ];
-    
-    nativeBuildInputs = [
-        # breakpointHook
-        yarnConfigHook
-        yarn
-        nodejs
-        jupyterlab
-    ];
-
-    dependencies = [
-      ipywidgets
-      jupyterlab
-    ];
+            substituteInPlace setup.py --replace "ensure_python('>=3.6')" ""
+            '';
 
     meta = with lib; {
         description = "A custom widget for returning mouse and keyboard events to Python. ";
