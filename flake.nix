@@ -59,6 +59,7 @@
 
       pythonEnv = python.withPackages(ps: [
         cq-flake.packages.${system}.cadquery
+        cq-flake.packages.${system}.build123d
         jupyter-cadquery
         jupyterlab
       ] ++ (with ps; [
