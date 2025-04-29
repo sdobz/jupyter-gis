@@ -46,8 +46,11 @@
       eerepr = python.pkgs.callPackage ./packages/eerepr.nix {
         inherit earthengine-api;
       };
-      ipyevents = python.pkgs.callPackage ./packages/ipyevents.nix {
-        inherit jupyterlab;
+      ipyevents = python.pkgs.callPackage ./packages/ipyevents.nix {};
+      ipyfilechooser = python.pkgs.callPackage ./packages/ipyfilechooser.nix {};
+      jupyter-leaflet = python.pkgs.callPackage ./packages/jupyter-leaflet.nix {};
+      ipyleaflet = python.pkgs.callPackage ./packages/ipyleaflet.nix {
+        inherit jupyter-leaflet;
       };
 
       pythonEnv = python.withPackages(ps: [
