@@ -1,32 +1,17 @@
 {
   description = "Volcandle dev env";
 
-  nixConfig.extra-substituters = [
-    "https://tweag-jupyter.cachix.org"
-  ];
-  nixConfig.extra-trusted-public-keys = [
-    "tweag-jupyter.cachix.org-1:UtNH4Zs6hVUFpFBTLaA4ejYavPo5EFFqgd7G7FxGW9g="
-  ];
-
   inputs = {
     cq-flake.url = "github:vinszent/cq-flake";
     utils.url = "github:numtide/flake-utils";
-    # jupyenv.url = "github:tweag/jupyenv";
   };
 
   outputs = { self, cq-flake, utils }: (utils.lib.eachSystem ["x86_64-linux" ] (system: let
     pkgs = cq-flake.inputs.nixpkgs.legacyPackages.${system};
     python = cq-flake.packages.${system}.python;
-    # inherit (jupyenv.lib.${system}) mkJupyterlabNew;
     
   in rec {
     packages = rec {
-      # pythreejs = pkgs.callPackage ./pythreejs.nix {
-      #   inherit (python.pkgs)
-      #     buildPythonPackage
-      #     setuptools
-      #     jupyterlab;
-      # };
       inherit (cq-flake.packages.${system}) cadquery;
 
       orjson = python.pkgs.orjson.overridePythonAttrs (old: rec {
@@ -75,11 +60,6 @@
         papermill
         black
       ]));
-
-      # jupyterlab = mkJupyterlabNew ({...}: {
-      #   nixpkgs = cq-flake.inputs.nixpkgs;
-      #   imports = [(import ./kernels.nix { inherit pythonEnv; })];
-      # });
     };
 
     apps.default.program = "${packages.pythonEnv}/bin/jupyter-lab";
@@ -90,15 +70,9 @@
     devShell = pkgs.mkShell {
       buildInputs = [
         packages.pythonEnv
-        # pkgs.openscad
-        pkgs.cntr
       ];
       shellHook = ''
-
-        export JUPYTERLAB_DIR="$(pwd)/.jupyter"
-        # jupyter labextension install jupyter-leaflet --app-dir=$JUPYTERLAB_DIR
         echo "Welcome to the Volcandle development environment!"
-        # Add more shell commands here if needed
       '';
     };
   }));
