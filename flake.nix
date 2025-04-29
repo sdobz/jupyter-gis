@@ -42,11 +42,20 @@
         inherit jupyterlab cad-viewer-widget ocp-vscode orjson;
       };
 
+      earthengine-api = python.pkgs.callPackage ./packages/earthengine-api.nix {};
+      eerepr = python.pkgs.callPackage ./packages/eerepr.nix {
+        inherit earthengine-api;
+      };
+      ipyevents = python.pkgs.callPackage ./packages/ipyevents.nix {
+        inherit jupyterlab;
+      };
+
       pythonEnv = python.withPackages(ps: [
         cq-flake.packages.${system}.cadquery
         cq-flake.packages.${system}.build123d
         jupyter-cadquery
         jupyterlab
+        earthengine-api
       ] ++ (with ps; [
         numpy
         pandas
@@ -59,6 +68,8 @@
 
         papermill
         black
+
+        geojson
       ]));
     };
 
