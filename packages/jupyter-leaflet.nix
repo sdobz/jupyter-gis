@@ -1,7 +1,11 @@
 { lib
 , buildPythonPackage
 , fetchPypi
-
+, setuptools
+, jupyterlab
+, hatchling
+, hatch-jupyter-builder
+, hatch-nodejs-version
 }:
 buildPythonPackage rec {
     pname = "jupyter_leaflet";
@@ -10,6 +14,17 @@ buildPythonPackage rec {
       inherit pname version;
       sha256 = "sha256-sJtbpIsUiMth2jem9Vg0cmnrU/9tZNwac+AF/8RCAGM=";
     };
+
+    pyproject = true;
+    env.HATCH_BUILD_NO_HOOKS = true;
+
+    build-system = [
+      hatchling
+      hatch-jupyter-builder
+      hatch-nodejs-version
+      jupyterlab
+    ];
+
     propagatedBuildInputs = [ 
 
     ];

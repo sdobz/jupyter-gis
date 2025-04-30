@@ -48,7 +48,9 @@
       };
       ipyevents = python.pkgs.callPackage ./packages/ipyevents.nix {};
       ipyfilechooser = python.pkgs.callPackage ./packages/ipyfilechooser.nix {};
-      jupyter-leaflet = python.pkgs.callPackage ./packages/jupyter-leaflet.nix {};
+      jupyter-leaflet = python.pkgs.callPackage ./packages/jupyter-leaflet.nix {
+        inherit jupyterlab;
+      };
       ipyleaflet = python.pkgs.callPackage ./packages/ipyleaflet.nix {
         inherit jupyter-leaflet;
       };
@@ -62,12 +64,20 @@
         inherit jupyterlab deepcomparer;
       };
 
+      touchterrain = python.pkgs.callPackage ./packages/touchterrain.nix {
+        inherit earthengine-api k3d-jupyter;
+      };
+
       pythonEnv = python.withPackages(ps: [
         cq-flake.packages.${system}.cadquery
         cq-flake.packages.${system}.build123d
         jupyter-cadquery
         jupyterlab
         earthengine-api
+        jupyter-leaflet
+        geemap
+        k3d-jupyter
+        touchterrain
       ] ++ (with ps; [
         numpy
         pandas
