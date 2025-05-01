@@ -9,6 +9,11 @@
   outputs = { self, cq-flake, utils }: (utils.lib.eachSystem ["x86_64-linux" ] (system: let
     pkgs = cq-flake.inputs.nixpkgs.legacyPackages.${system};
     python = cq-flake.packages.${system}.python;
+
+    unfreePkgs = import cq-flake.inputs.nixpkgs {
+      inherit system;
+      config.allowUnfree = true;
+    };
     
   in rec {
     packages = rec {
@@ -68,6 +73,12 @@
         inherit earthengine-api k3d-jupyter;
       };
 
+      
+
+      pymesh = python.pkgs.callPackage ./packages/pymesh.nix { # holy heck what a time killer. Does not work!
+        mkl = unfreePkgs.mkl;
+      };
+
       pythonEnv = python.withPackages(ps: [
         cq-flake.packages.${system}.cadquery
         cq-flake.packages.${system}.build123d
@@ -103,6 +114,7 @@
     devShell = pkgs.mkShell {
       buildInputs = [
         packages.pythonEnv
+        pkgs.cntr
       ];
       shellHook = ''
         echo "Welcome to the Volcandle development environment!"
