@@ -24,10 +24,10 @@ buildPythonPackage rec {
     version = "3.5-dev";
 
     src = fetchFromGitHub {
-        owner = "ChHarding";
+        owner = "sdobz";
         repo = "TouchTerrain_for_CAGEO";
-        rev = "bbbc32c6f8ed1b54b644ed224c3cfc2e63be397a";
-        hash = "sha256-R9N97Fn7Z+BAJ9vG9ps5u2/sEFIJX6NuKFtM7Dcj5eI=";
+        rev = "a83933ff026f77dfe9809e09ced71ed9aea287e1";
+        hash = "sha256-Qr6/5QQaYU924hbxd3Eeg7voE2M9x6bYsIt1lm6Evzw=";
     };
     
     build-system = [
