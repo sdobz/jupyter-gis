@@ -73,11 +73,11 @@
         inherit earthengine-api k3d-jupyter;
       };
 
-      
-
       pymesh = python.pkgs.callPackage ./packages/pymesh.nix { # holy heck what a time killer. Does not work!
         mkl = unfreePkgs.mkl;
       };
+
+      fast-simplification = python.pkgs.callPackage ./packages/fast-simplification.nix {};
 
       pythonEnv = python.withPackages(ps: [
         cq-flake.packages.${system}.cadquery
@@ -89,13 +89,13 @@
         geemap
         k3d-jupyter
         touchterrain
+        fast-simplification
       ] ++ (with ps; [
         numpy
         pandas
         pillow
         rasterio
 
-        numpy # these two are
         scipy # probably redundant to pandas
         matplotlib
 
