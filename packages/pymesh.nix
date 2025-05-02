@@ -1,48 +1,109 @@
 # doesn't quite work yet
 { lib
 , buildPythonPackage
+, python
 , fetchFromGitHub
 
 , stdenv
 , cmake
 , gcc
-#, mkl
+, mkl
 
 # required c deps
 , gmp
 , mpfr
 , boost
 # in third-party
-, eigen
-, tbb
-, nlohmann_json
-, pybind11
-, libigl
+# , eigen
+# , tbb
+# , nlohmann_json
+# , pybind11
+# , libigl
 
 , setuptools
 , distutils
 
-, breakpointHook
-, keepBuildTree
+# , breakpointHook
+# , keepBuildTree
 }: let
   src = fetchFromGitHub {
-      owner = "rocketvector";
+      owner = "sdobz";
       repo = "PyMesh";
-      rev = "16363009cd0b534f04854c92a478be8fafe55252";
-      hash = "sha256-Ihi/l011CFzR8dIhiXe9NTp8GSRH8pcJM5sYhNzmNqQ=";
+      rev = "52dced1114a8434db38aeabbb01145bb0f892a20";
+      hash = "sha256-uF3gV73cQmPCwLeqt0HjkJUbvrnFQEBH46qlnd9AOuA=";
+      fetchSubmodules = true;
+  };
+  pymeshThirdParty = stdenv.mkDerivation {
+    pname = "pymesh-third-party";
+    version = "0.3";
+
+    inherit src;
+
+    # only relevant with cmake configure
+    # dependencies = [
+    #   gmp
+    #   mpfr
+    #   boost
+    # ];
+
+    buildInputs = [
+      # breakpointHook
+      cmake
+      gcc
+
+      gmp
+      mpfr
+      boost
+    ];
+
+    dontUseCmakeConfigure = true;
+
+    buildPhase = ''
+      CMAKE_INCLUDE_PATH="$CMAKE_INCLUDE_PATH:${boost.dev}/include:${gmp.dev}/include:${mpfr.dev}/include"
+      CMAKE_LIBRARY_PATH="$CMAKE_LIBRARY_PATH:${boost}/lib:${gmp}/lib:${mpfr}/lib"
+      cd third_party
+      python build.py all
+    '';
+
+    installPhase = ''
+      mkdir $out
+      cp -r ../python/pymesh/third_party $out
+    '';
   };
 
-  # tbb = stdenv.mkDerivation {
-  #   pname = "tbb";
-  #   version = "dev";
+  pymeshLib = stdenv.mkDerivation {
+    pname = "pymesh-lib";
+    version = "0.3";
+    
+    build-system = "cmake";
+    inherit src;
 
-  #   src = fetchFromGitHub {
-  #     owner = "PyMesh";
-  #     repo = "tbb";
-  #     rev = "ed6f6f15cece26ae4ab0816eab220c5e0691093f";
-  #     hash = "sha256-Ihi/l011CFzR8dIhiXe9NTp8GSRH8pcJM5sYhNzmNqS=";
-  #   };
-  # };
+    postPatch = ''
+      substituteInPlace cmake/FindAllDependencies.cmake --replace-fail 'lib/cmake/nlohmann_json' 'lib64/cmake/nlohmann_json'
+      substituteInPlace Settings.cmake --replace-fail 'execute_process(COMMAND ''${PYTHON_EXECUTABLE} ''${PROJECT_SOURCE_DIR}/cmake/SetInstallRpath.py)' ' '
+      substituteInPlace Settings.cmake --replace-fail 'include(SetInstallRpath)' ' '
+    '';
+
+    buildInputs = [
+      # breakpointHook
+      cmake
+      gcc
+
+      gmp
+      mpfr
+      boost
+      mkl
+    ];
+
+    preConfigure = ''
+    ln -s "${pymeshThirdParty}/third_party" python/pymesh/third_party
+    '';
+
+    installPhase = ''
+    mkdir $out
+    cp -r python/pymesh/lib $out
+    '';
+  };
 in 
 buildPythonPackage rec {
     pname = "pymesh";
@@ -50,60 +111,19 @@ buildPythonPackage rec {
 
     inherit src;
 
-    postPatch = ''
-        substituteInPlace Settings.cmake --replace 'add_subdirectory(''${PROJECT_SOURCE_DIR}/third_party/pybind11)' 'find_package(pybind11 REQUIRED)'
-    #   substituteInPlace setup.py --replace 'commands = [' 'print(os.getcwd()); commands = ['
-    #   substituteInPlace third_party/tbb/include/tbb/task.h --replace 'task* next_offloaded;' 'tbb::task* next_offloaded;'
-    #   substituteInPlace third_party/pybind11/include/pybind11/pybind11.h --replace 'std::uint16_t' 'uint16_t'
-    #   substituteInPlace third_party/pybind11/include/pybind11/attr.h --replace 'std::uint16_t' 'uint16_t'
-    '';
-
-    build-system = [
-      cmake
-    ];
-
     buildInputs = [
       setuptools
       distutils
     ];
 
-    nativeBuildInputs = [
-      # breakpointHook
-      cmake
-
-      # thirdparty, need to use cmake flags??
-      # eigen
-      # tbb
-      # nlohmann_json
-      # libigl
-      # thidparty, auto found?
-      pybind11
-
-      # implicit
-      # mkl # not required
-
-      gmp
-      mpfr
-      boost
-    ];
-
-    cmakeFlags = [
-      "-DEIGEN_ROOT_DIR=${eigen}/include/eigen3/"
-      "-DTBB_INCLUDE_DIR=${tbb.dev}/include/tbb"
-      "-DTBB_LIBRARY=${tbb}/lib/tbb.so"
-      "-DTBB_LIBRARY_MALLOC=${tbb}/lib/tbbmalloc.so"
-      "-DBoost_INCLUDE_DIR=${boost.dev}/include"
-      "-Dnlohmann_json_DIR=${nlohmann_json}/share/cmake/nlohmann_json"
-      "-DLIBIGL_INCLUDE_DIRS=${libigl}"
-    ];
+    preConfigure = ''
+    ln -s "${pymeshThirdParty}/third_party" python/pymesh/third_party
+    ln -s "${pymeshLib}/lib" python/pymesh/lib
+    '';
 
     # https://github.com/PyMesh/PyMesh?tab=readme-ov-file#build
 
     buildPhase = ''
-    mkdir build
-    cd build
-    cmake ..
-    cd ..
     python setup.py bdist_wheel --skip-build
     '';
     

@@ -74,7 +74,7 @@
       };
 
       pymesh = python.pkgs.callPackage ./packages/pymesh.nix { # holy heck what a time killer. Does not work!
-        #mkl = unfreePkgs.mkl;
+        mkl = unfreePkgs.mkl;
       };
 
       fast-simplification = python.pkgs.callPackage ./packages/fast-simplification.nix {};
