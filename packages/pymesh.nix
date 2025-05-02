@@ -124,6 +124,7 @@ buildPythonPackage rec {
 
     postPatch = ''
     substituteInPlace setup.py --replace-fail 'cmake_build,' 'build,'
+    substituteInPlace python/pymesh/misc/quaternion.py --replace-fail 'np.float' 'float'
     '';
 
     preBuild = ''
