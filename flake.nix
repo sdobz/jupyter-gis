@@ -89,6 +89,7 @@
         geemap
         k3d-jupyter
         touchterrain
+        pymesh
         fast-simplification
       ] ++ (with ps; [
         numpy

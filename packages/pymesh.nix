@@ -23,7 +23,12 @@
 , setuptools
 , distutils
 
-# , breakpointHook
+, numpy
+, scipy
+
+, patchelf
+
+, breakpointHook
 # , keepBuildTree
 }: let
   src = fetchFromGitHub {
@@ -47,7 +52,6 @@
     # ];
 
     buildInputs = [
-      # breakpointHook
       cmake
       gcc
 
@@ -67,7 +71,7 @@
 
     installPhase = ''
       mkdir $out
-      cp -r ../python/pymesh/third_party $out
+      cp -r ../python/pymesh/third_party/* $out
     '';
   };
 
@@ -93,18 +97,20 @@
       mpfr
       boost
       mkl
+      pymeshThirdParty
     ];
 
     preConfigure = ''
-    ln -s "${pymeshThirdParty}/third_party" python/pymesh/third_party
+    ln -s "${pymeshThirdParty}" python/pymesh/third_party
     '';
 
     installPhase = ''
     mkdir $out
-    cp -r python/pymesh/lib $out
+    cp -r ../python/pymesh/lib $out
+    mv $out/lib/PyMeshNone $out/lib/PyMesh.so
     '';
   };
-in 
+in
 buildPythonPackage rec {
     pname = "pymesh";
     version = "0.3";
@@ -116,15 +122,29 @@ buildPythonPackage rec {
       distutils
     ];
 
-    preConfigure = ''
-    ln -s "${pymeshThirdParty}/third_party" python/pymesh/third_party
+    postPatch = ''
+    substituteInPlace setup.py --replace-fail 'cmake_build,' 'build,'
+    '';
+
+    preBuild = ''
+    ln -s "${pymeshThirdParty}" python/pymesh/third_party
     ln -s "${pymeshLib}/lib" python/pymesh/lib
     '';
 
-    # https://github.com/PyMesh/PyMesh?tab=readme-ov-file#build
+    dependencies = [
+      numpy
+      scipy
+    ];
 
-    buildPhase = ''
-    python setup.py bdist_wheel --skip-build
+    nativeBuildInputs = [
+      patchelf
+    ];
+
+    postInstall = ''
+    find "$out/lib/${python.libPrefix}/site-packages/pymesh/lib" -name '*.so' -type f | while read -r so; do
+      echo "Patching $so"
+      patchelf --add-rpath \$ORIGIN/../third_party/lib $so
+    done
     '';
     
     pythonImportsCheck = "pymesh";
