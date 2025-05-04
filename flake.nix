@@ -95,10 +95,19 @@
         numpy
         pandas
         pillow
+
+        trimesh
+        networkx
+        lxml
+
         rasterio
 
-        scipy # probably redundant to pandas
+        scipy
         matplotlib
+
+        # font processing
+        fonttools
+        cu2qu
 
         papermill
         black
