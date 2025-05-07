@@ -79,6 +79,8 @@
 
       fast-simplification = python.pkgs.callPackage ./packages/fast-simplification.nix {};
 
+      pyhershey = python.pkgs.callPackage ./packages/pyhershey.nix {};
+
       pythonEnv = python.withPackages(ps: [
         cq-flake.packages.${system}.cadquery
         cq-flake.packages.${system}.build123d
@@ -91,6 +93,7 @@
         touchterrain
         pymesh
         fast-simplification
+        pyhershey
       ] ++ (with ps; [
         numpy
         pandas
