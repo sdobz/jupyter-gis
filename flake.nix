@@ -103,6 +103,9 @@
         networkx
         lxml
 
+        shapely
+        scikit-image
+
         rasterio
 
         scipy
